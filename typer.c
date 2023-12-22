@@ -30,15 +30,12 @@ int line = 0;
 
 int main(void) {
 	struct timespec s_time = {0, 0}, e_time;
-	int characters = 0;
 	unsigned int c;
 	char editor[1024] = {0};
 	char *endpos = editor;
 	size_t numchars;
 	FILE *fp;
 	int errors = 0;
-//	size_t tmplen = 3;
-//	char *tmp = malloc(tmplen);
 	bool backspace = false;
 	char *tmpstr = NULL;
 
@@ -53,8 +50,6 @@ int main(void) {
 	setlocale(LC_ALL, "");
 	atexit(reset_term);
 	change_term();
-
-	//printf("\033[H\033[J");
 
 	fp = popen("/usr/bin/python3 ./wiki.py", "r");
 	if (NULL == fp) {
@@ -86,10 +81,6 @@ int main(void) {
 		actual_size++;
 		llen++;
 		if ('\n' == editor[i]) {
-//			if (line >= numlines) {
-//				printf("line was %d, numlines was %d", line, numlines);
-//				exit(1);
-//			}
 			line_len[line] = llen;
 			llen = 0;
 			line++;
@@ -105,11 +96,6 @@ int main(void) {
 	printf("\e[36;1m%s\e[0m\e[%dA\r", (char *) editor, numlines);
 	fflush(stdout);
 
-	/*// TESTING
-	int col = 1;
-	int l = 1;
-	// TESTING*/
-
 	while (endpos - editor < (signed) strlen((char *) editor)) {
 		if (tmpstr) {
 			free(tmpstr);
@@ -123,16 +109,11 @@ int main(void) {
 			break;
 		}
 		
-		//c = getchar();
-		//scanf("%lc", &c);
 		c = int_char_read();
 		// start the clock once user starts typing
 		if (s_time.tv_sec == 0) clock_gettime(CLOCK_REALTIME, &s_time);
 
 		chars_typed++;
-
-//		if (c == 127)
-//			continue;
 
 		// clen is the actual length of the character currently in endpos
 		size_t clen = num_bytes(endpos);
@@ -160,7 +141,6 @@ int main(void) {
 			cnew <<= 8;
 			cnew |= endpos[i];
 		}
-		//for (cnew = 0; ((c >> cnew * 8) & 0x00ffffff) != 0; cnew++);
 
 		if (c == 127 && endpos > editor) {
 			printf("\b");
@@ -184,33 +164,13 @@ int main(void) {
 			printf("%s", tmpstr);
 			fflush(stdout);
 			characters++;
-			/*// TESTING
-			col++;
-			// TESTING*/
 			if ('\n' == *endpos) {
-				//printf("\n");
 				line++;
 				line_pos = 0;
-				/*// TESTING
-				col = 0;
-				l++;
-				// TESTING*/
 			}
 			endpos += clen;
 			continue;
 		} 
-
-		//unac_string("UTF-8", endpos, clen, &tmp, &tmplen);
-		/*// TESTING
-		printf("\r\x1b[0m\x1b[%dB", numlines);
-		printf("%s %s", tmp, tmpstr);
-		printf("\x1b[0m\x1b[%d;%dH", l, col);
-		// TESTING*/
-		//if (c == (unsigned) *tmp && *tmp != *endpos) {
-		//	printf("%s", tmpstr);
-		//	endpos += clen;
-		//	continue;
-		//}
 
 		printf("\e[31m%s\e[0m", tmpstr);
 		if ('\n' == *endpos) {
@@ -222,10 +182,6 @@ int main(void) {
 		errors++;
 		error_made(incorrect, actual_size / 8 + 1, chars_typed, true);
 
-//		if (!iscntrl(c)) {
-//			*endpos = c;
-//			*++endpos = '\0';
-//		}
 	}
 	printf("\n");
 	clock_gettime(CLOCK_REALTIME, &e_time);
@@ -234,14 +190,7 @@ int main(void) {
 	double accuracy = 1.0 - num_errors(incorrect, actual_size / 8 + 1) / (double) chars_typed;
 	printf("accuracy: %.2lf\n", accuracy);
 	double minutes = (e_time.tv_sec - s_time.tv_sec) / 60.0 + (e_time.tv_nsec - s_time.tv_nsec) / 60000000000.0;
-//	int truechars = 0;
-//	for (unsigned int i = 0; i < numchars; i++) {
-//		if (editor[i] <= 0x80 && editor[i] >= 0xbf) {
-//			i++;
-//			continue;
-//		}
-//		truechars++;
-//	}
+
 	double wpm = (chars_typed / 5.0) / minutes;
 	printf("words: %.2f, wpm: %.2lf\n", chars_typed / 5.0, wpm);
 	printf("%.2lf%% * %.2lf wpm = %.2lf\n", accuracy, wpm, wpm * accuracy);
@@ -330,7 +279,5 @@ void reset_term(void) {
 		free(orig_info);
 		orig_info = NULL;
 		printf("\e[%dB\r\n", numlines - line + 1);
-//		for (int i = 0; i < numlines; ++i)
-//			printf("\n");
 	}
 }
