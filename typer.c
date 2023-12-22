@@ -6,7 +6,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <stddef.h>
-//#include <unac.h>
 #include <locale.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -163,7 +162,6 @@ int main(void) {
 		if (c == cnew || (isspace(c) && isspace(cnew))) {
 			printf("%s", tmpstr);
 			fflush(stdout);
-			characters++;
 			if ('\n' == *endpos) {
 				line++;
 				line_pos = 0;
